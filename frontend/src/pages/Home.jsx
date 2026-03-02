@@ -1,11 +1,16 @@
 import { Link } from 'react-router-dom'
 import { useAuth } from '../context/AuthContext'
+import Banner from '../components/Banner'
+import FeatureCard from '../components/FeatureCard'
 
 const Home = () => {
   const { isAuthenticated } = useAuth()
 
   return (
     <div className="min-h-[calc(100vh-4rem)]">
+      {/* Banner Section */}
+      <Banner />
+      
       {/* Hero Section */}
       <section className="wellness-gradient py-20 px-4">
         <div className="max-w-4xl mx-auto text-center">
@@ -43,33 +48,27 @@ const Home = () => {
             Wellness Features
           </h2>
           <div className="grid md:grid-cols-3 gap-8">
-            <div className="card text-center">
-              <div className="w-16 h-16 bg-wellness-peach rounded-2xl mx-auto mb-4 flex items-center justify-center text-3xl">
-                📅
-              </div>
-              <h3 className="text-xl font-semibold mb-2">Cycle Tracking</h3>
-              <p className="text-neutral-600">
-                Track your cycle with ease and get personalized predictions
-              </p>
-            </div>
-            <div className="card text-center">
-              <div className="w-16 h-16 bg-wellness-lavender rounded-2xl mx-auto mb-4 flex items-center justify-center text-3xl">
-                💭
-              </div>
-              <h3 className="text-xl font-semibold mb-2">Mood & Symptoms</h3>
-              <p className="text-neutral-600">
-                Log your mood and symptoms to understand patterns
-              </p>
-            </div>
-            <div className="card text-center">
-              <div className="w-16 h-16 bg-wellness-mint rounded-2xl mx-auto mb-4 flex items-center justify-center text-3xl">
-                📊
-              </div>
-              <h3 className="text-xl font-semibold mb-2">Smart Insights</h3>
-              <p className="text-neutral-600">
-                Get AI-powered insights about your wellness journey
-              </p>
-            </div>
+            <FeatureCard
+              icon="📅"
+              title="Cycle Tracking"
+              description="Track your cycle with ease and get personalized predictions"
+              path="/cycle"
+              bgColor="bg-wellness-peach"
+            />
+            <FeatureCard
+              icon="💭"
+              title="Mood & Symptoms"
+              description="Log your mood and symptoms to understand patterns"
+              path="/mood"
+              bgColor="bg-wellness-lavender"
+            />
+            <FeatureCard
+              icon="📊"
+              title="Smart Insights"
+              description="Get AI-powered insights about your wellness journey"
+              path="/insights"
+              bgColor="bg-wellness-mint"
+            />
           </div>
         </div>
       </section>

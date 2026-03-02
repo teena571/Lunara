@@ -1,5 +1,5 @@
 import { useState, useEffect, useRef } from 'react'
-import { Link, useNavigate } from 'react-router-dom'
+import { Link, useNavigate, useLocation } from 'react-router-dom'
 import { useAuth } from '../context/AuthContext'
 
 const Login = () => {
@@ -12,6 +12,7 @@ const Login = () => {
   const [loading, setLoading] = useState(false)
   const { login } = useAuth()
   const navigate = useNavigate()
+  const location = useLocation()
   
   // Use refs to store timer IDs
   const fadeTimerRef = useRef(null)
@@ -42,7 +43,9 @@ const Login = () => {
     const result = await login(email, password)
     
     if (result.success) {
-      navigate('/dashboard')
+      // Redirect to the page user was trying to access, or dashboard
+      const from = location.state?.from || '/dashboard'
+      navigate(from)
     } else {
       // Set error and show it
       const errorMessage = result.message || result.error
