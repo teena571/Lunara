@@ -1,0 +1,67 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  body {
+    @apply bg-wellness-cream text-neutral-800 font-sans antialiased;
+  }
+  
+  h1, h2, h3, h4, h5, h6 {
+    @apply font-display;
+  }
+}
+
+@layer components {
+  .btn-primary {
+    @apply bg-primary-500 hover:bg-primary-600 text-white font-medium py-2.5 px-6 rounded-xl transition-all duration-200 shadow-wellness hover:shadow-lg;
+  }
+  
+  .btn-secondary {
+    @apply bg-secondary-100 hover:bg-secondary-200 text-secondary-700 font-medium py-2.5 px-6 rounded-xl transition-all duration-200;
+  }
+  
+  .card {
+    @apply bg-white rounded-2xl shadow-soft p-6 transition-all duration-200 hover:shadow-wellness;
+  }
+  
+  .input-field {
+    @apply w-full px-4 py-3 rounded-xl border border-neutral-200 focus:border-primary-300 focus:ring-2 focus:ring-primary-100 outline-none transition-all duration-200;
+  }
+  
+  .wellness-gradient {
+    @apply bg-gradient-to-br from-wellness-peach via-wellness-lavender to-wellness-mint;
+  }
+}
+
+@layer utilities {
+  .animate-fade-in {
+    animation: fadeIn 0.5s ease-in-out;
+  }
+  
+  .animate-fade-out {
+    animation: fadeOut 0.5s ease-in-out;
+  }
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(-10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes fadeOut {
+  from {
+    opacity: 1;
+    transform: translateY(0);
+  }
+  to {
+    opacity: 0;
+    transform: translateY(-10px);
+  }
+}
