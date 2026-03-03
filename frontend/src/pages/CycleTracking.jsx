@@ -1,12 +1,17 @@
 import { useState, useEffect } from 'react'
 import { useCycle } from '../context/CycleContext'
+import { useMood } from '../context/MoodContext'
 import Calendar from '../components/Calendar'
 import CycleForm from '../components/CycleForm'
 import CyclePredictions from '../components/CyclePredictions'
+import CycleDetection from '../components/CycleDetection'
+import { analyzePMSPatterns, predictNextPMSWindow, shouldShowPMSNotification, getPMSNotificationMessage } from '../utils/pmsPrediction'
 
 const CycleTracking = () => {
   const { cycles, loading, predictions } = useCycle()
+  const { moodEntries } = useMood()
   const [showForm, setShowForm] = useState(false)
+  const [showCycleDetection, setShowCycleDetection] = useState(false)
   const [selectedDate, setSelectedDate] = useState(null)
 
   // Check if period is approaching (within 3 days)
@@ -21,6 +26,32 @@ const CycleTracking = () => {
       }
     }
   }, [predictions])
+
+  // Check for PMS notification (1-2 days before PMS window)
+  useEffect(() => {
+    if (cycles.length >= 2 && moodEntries.length > 0 && predictions) {
+      const pmsAnalysis = analyzePMSPatterns(cycles, moodEntries)
+      const pmsWindow = predictNextPMSWindow(predictions)
+      
+      if (pmsWindow && pmsWindow.shouldNotify) {
+        const pmsPrediction = {
+          available: pmsAnalysis.hasSufficientData,
+          hasPatterns: pmsAnalysis.hasRecurringPatterns,
+          recurringMoods: pmsAnalysis.recurringMoods || [],
+          nextPMSWindow: pmsWindow
+        }
+
+        if (shouldShowPMSNotification(pmsPrediction)) {
+          if ('Notification' in window && Notification.permission === 'granted') {
+            new Notification('PMS Alert 🎯', {
+              body: getPMSNotificationMessage(pmsPrediction),
+              icon: '/favicon.ico'
+            })
+          }
+        }
+      }
+    }
+  }, [cycles, moodEntries, predictions])
 
   // Request notification permission
   useEffect(() => {
@@ -44,13 +75,38 @@ const CycleTracking = () => {
       {/* Predictions Card */}
       {predictions && <CyclePredictions predictions={predictions} />}
 
-      {/* Action Buttons */}
-      <div className="mb-6 flex gap-4">
+      {/* Action Cards */}
+      <div className="grid md:grid-cols-2 gap-4 mb-6">
+        {/* Log New Cycle Card */}
         <button
           onClick={() => setShowForm(true)}
-          className="btn-primary"
+          className="card hover:shadow-lg transition-shadow text-left p-6 bg-gradient-to-br from-purple-50 to-pink-50 border-2 border-purple-200"
         >
-          + Log New Cycle
+          <div className="flex items-center gap-4">
+            <div className="w-12 h-12 bg-purple-500 rounded-full flex items-center justify-center text-2xl">
+              ➕
+            </div>
+            <div>
+              <h3 className="text-lg font-semibold text-gray-800">Log New Cycle</h3>
+              <p className="text-sm text-gray-600">Track your period start date</p>
+            </div>
+          </div>
+        </button>
+
+        {/* Cycle Detection Card */}
+        <button
+          onClick={() => setShowCycleDetection(true)}
+          className="card hover:shadow-lg transition-shadow text-left p-6 bg-gradient-to-br from-blue-50 to-teal-50 border-2 border-blue-200"
+        >
+          <div className="flex items-center gap-4">
+            <div className="w-12 h-12 bg-blue-500 rounded-full flex items-center justify-center text-2xl">
+              🔍
+            </div>
+            <div>
+              <h3 className="text-lg font-semibold text-gray-800">Cycle Detection</h3>
+              <p className="text-sm text-gray-600">View insights & PMS prediction</p>
+            </div>
+          </div>
         </button>
       </div>
 
@@ -124,6 +180,11 @@ const CycleTracking = () => {
             setSelectedDate(null)
           }}
         />
+      )}
+
+      {/* Cycle Detection Modal */}
+      {showCycleDetection && (
+        <CycleDetection onClose={() => setShowCycleDetection(false)} />
       )}
     </div>
   )

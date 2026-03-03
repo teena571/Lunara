@@ -8,12 +8,16 @@ const cors = require('cors');
 const connectDB = require('./config/db');
 const errorHandler = require('./middleware/errorHandler');
 const rateLimit = require('express-rate-limit');
+const { initializeScheduler } = require('./services/schedulerService');
 
 // Load env vars
 dotenv.config();
 
 // Connect to database
 connectDB();
+
+// Initialize scheduler service
+initializeScheduler();
 
 const app = express();
 
@@ -27,11 +31,15 @@ app.use(mongoSanitize());
 app.use(hpp());
 app.use(cors());
 
-// Rate limiting
+// Rate limiting - More lenient for development
 const limiter = rateLimit({
-  windowMs: parseInt(process.env.RATE_LIMIT_WINDOW_MS) || 15 * 60 * 1000,
-  max: parseInt(process.env.RATE_LIMIT_MAX_REQUESTS) || 100,
-  message: 'Too many requests from this IP, please try again later'
+  windowMs: parseInt(process.env.RATE_LIMIT_WINDOW_MS) || 15 * 60 * 1000, // 15 minutes
+  max: parseInt(process.env.RATE_LIMIT_MAX_REQUESTS) || 1000, // Increased from 100 to 1000
+  message: 'Too many requests from this IP, please try again later',
+  standardHeaders: true,
+  legacyHeaders: false,
+  // Skip rate limiting in development
+  skip: (req) => process.env.NODE_ENV === 'development'
 });
 app.use('/api/', limiter);
 
@@ -45,6 +53,9 @@ app.use('/api/v1/auth', require('./routes/authRoutes'));
 app.use('/api/v1/users', require('./routes/userRoutes'));
 app.use('/api/v1/cycles', require('./routes/cycleRoutes'));
 app.use('/api/v1/symptoms', require('./routes/symptomRoutes'));
+app.use('/api/v1/analytics', require('./routes/analyticsRoutes'));
+app.use('/api/v1/notifications', require('./routes/notificationRoutes'));
+app.use('/api/v1/reports', require('./routes/reportRoutes'));
 
 // Health check
 app.get('/health', (req, res) => {

@@ -11,6 +11,7 @@ import Dashboard from './pages/Dashboard'
 import CycleTracking from './pages/CycleTracking'
 import MoodTracking from './pages/MoodTracking'
 import Insights from './pages/Insights'
+import Analytics from './pages/Analytics'
 import UpdatePassword from './pages/UpdatePassword'
 import ForgotPassword from './pages/ForgotPassword'
 import ResetPassword from './pages/ResetPassword'
@@ -21,7 +22,7 @@ function App() {
     <AuthProvider>
       <CycleProvider>
         <MoodProvider>
-          <Router>
+          <Router future={{ v7_startTransition: true, v7_relativeSplatPath: true }}>
             <Routes>
               <Route path="/" element={<Layout />}>
                 <Route index element={<Home />} />
@@ -52,6 +53,12 @@ function App() {
                 <Route path="insights" element={
                   <ProtectedRoute>
                     <Insights />
+                  </ProtectedRoute>
+                } />
+                
+                <Route path="analytics" element={
+                  <ProtectedRoute>
+                    <Analytics />
                   </ProtectedRoute>
                 } />
                 

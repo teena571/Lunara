@@ -26,56 +26,6 @@ const Insights = () => {
 
   const hasData = cycles.length > 0 || moodEntries.length > 0
 
-  const handleDownloadReport = () => {
-    // Generate text report
-    const report = generateTextReport(filteredData, dateRange)
-    const blob = new Blob([report], { type: 'text/plain' })
-    const url = URL.createObjectURL(blob)
-    const a = document.createElement('a')
-    a.href = url
-    a.download = `wellness-insights-${new Date().toISOString().split('T')[0]}.txt`
-    document.body.appendChild(a)
-    a.click()
-    document.body.removeChild(a)
-    URL.revokeObjectURL(url)
-  }
-
-  const generateTextReport = (data, range) => {
-    const date = new Date().toLocaleDateString()
-    let report = `LUNARA WELLNESS INSIGHTS REPORT\n`
-    report += `Generated: ${date}\n`
-    report += `Date Range: Last ${range} days\n`
-    report += `\n${'='.repeat(50)}\n\n`
-
-    report += `CYCLE DATA\n`
-    report += `Total Cycles Logged: ${data.cycles.length}\n`
-    if (data.cycles.length > 0) {
-      const avgLength = data.cycles
-        .filter(c => c.cycleLength)
-        .reduce((sum, c) => sum + c.cycleLength, 0) / data.cycles.filter(c => c.cycleLength).length
-      report += `Average Cycle Length: ${avgLength.toFixed(1)} days\n`
-    }
-    report += `\n`
-
-    report += `MOOD DATA\n`
-    report += `Total Mood Entries: ${data.moods.length}\n`
-    if (data.moods.length > 0) {
-      const moodCounts = {}
-      data.moods.forEach(m => {
-        moodCounts[m.mood] = (moodCounts[m.mood] || 0) + 1
-      })
-      const mostCommon = Object.entries(moodCounts).sort((a, b) => b[1] - a[1])[0]
-      report += `Most Common Mood: ${mostCommon[0]} (${mostCommon[1]} times)\n`
-    }
-    report += `\n`
-
-    report += `${'='.repeat(50)}\n`
-    report += `\nThis report is for personal wellness tracking only.\n`
-    report += `Consult healthcare professionals for medical advice.\n`
-
-    return report
-  }
-
   return (
     <div className="max-w-7xl mx-auto px-4 py-8">
       {/* Header */}
@@ -110,7 +60,7 @@ const Insights = () => {
         <>
           {/* Filters */}
           <div className="card mb-8">
-            <div className="flex flex-col sm:flex-row gap-4 items-start sm:items-center justify-between">
+            <div className="flex flex-col sm:flex-row gap-4 items-start sm:items-center">
               <div className="flex flex-wrap gap-4">
                 {/* Date Range Filter */}
                 <div>
@@ -147,17 +97,6 @@ const Insights = () => {
                   </select>
                 </div>
               </div>
-
-              {/* Download Button */}
-              <button
-                onClick={handleDownloadReport}
-                className="btn-secondary flex items-center gap-2"
-              >
-                <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
-                </svg>
-                Download Report
-              </button>
             </div>
           </div>
 
