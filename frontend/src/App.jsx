@@ -2,7 +2,7 @@ import { BrowserRouter as Router, Routes, Route } from 'react-router-dom'
 import { AuthProvider } from './context/AuthContext'
 import { CycleProvider } from './context/CycleContext'
 import { MoodProvider } from './context/MoodContext'
-import ProtectedRoute from './components/ProtectedRoute'
+import ProtectedRoute, { PublicRoute } from './components/ProtectedRoute'
 import Layout from './components/Layout'
 import Home from './pages/Home'
 import Login from './pages/Login'
@@ -26,8 +26,20 @@ function App() {
             <Routes>
               <Route path="/" element={<Layout />}>
                 <Route index element={<Home />} />
-                <Route path="login" element={<Login />} />
-                <Route path="register" element={<Register />} />
+                
+                {/* Public Routes - Redirect to dashboard if already logged in */}
+                <Route path="login" element={
+                  <PublicRoute>
+                    <Login />
+                  </PublicRoute>
+                } />
+                
+                <Route path="register" element={
+                  <PublicRoute>
+                    <Register />
+                  </PublicRoute>
+                } />
+                
                 <Route path="forgot-password" element={<ForgotPassword />} />
                 <Route path="reset-password/:token" element={<ResetPassword />} />
                 

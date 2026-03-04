@@ -1,4 +1,5 @@
 import { createContext, useState, useContext, useEffect } from 'react'
+import { useAuth } from './AuthContext'
 
 const MoodContext = createContext()
 
@@ -11,28 +12,44 @@ export const useMood = () => {
 }
 
 export const MoodProvider = ({ children }) => {
+  const { user } = useAuth()
   const [moodEntries, setMoodEntries] = useState([])
   const [loading, setLoading] = useState(true)
 
-  // Load from localStorage on mount
+  // Get user-specific localStorage key
+  const getStorageKey = () => {
+    return user ? `moodEntries_${user.id}` : 'moodEntries_guest'
+  }
+
+  // Load from localStorage on mount or when user changes
   useEffect(() => {
-    const stored = localStorage.getItem('moodEntries')
-    if (stored) {
-      try {
-        setMoodEntries(JSON.parse(stored))
-      } catch (error) {
-        console.error('Error loading mood entries:', error)
+    if (user) {
+      const storageKey = getStorageKey()
+      const stored = localStorage.getItem(storageKey)
+      if (stored) {
+        try {
+          setMoodEntries(JSON.parse(stored))
+        } catch (error) {
+          console.error('Error loading mood entries:', error)
+          setMoodEntries([])
+        }
+      } else {
+        setMoodEntries([])
       }
+    } else {
+      // No user logged in, clear mood entries
+      setMoodEntries([])
     }
     setLoading(false)
-  }, [])
+  }, [user])
 
   // Save to localStorage whenever entries change
   useEffect(() => {
-    if (!loading) {
-      localStorage.setItem('moodEntries', JSON.stringify(moodEntries))
+    if (!loading && user) {
+      const storageKey = getStorageKey()
+      localStorage.setItem(storageKey, JSON.stringify(moodEntries))
     }
-  }, [moodEntries, loading])
+  }, [moodEntries, loading, user])
 
   // Add new mood entry
   const addMoodEntry = (entry) => {

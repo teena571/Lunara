@@ -37,14 +37,22 @@ const MoodForm = ({ selectedDate, existingEntry, onClose }) => {
 
   useEffect(() => {
     if (existingEntry) {
-      setDate(new Date(existingEntry.date).toISOString().split('T')[0])
+      // Use local date formatting to avoid timezone issues
+      const entryDate = new Date(existingEntry.date)
+      const formattedDate = `${entryDate.getFullYear()}-${String(entryDate.getMonth() + 1).padStart(2, '0')}-${String(entryDate.getDate()).padStart(2, '0')}`
+      setDate(formattedDate)
       setMood(existingEntry.mood)
       setSymptoms(existingEntry.symptoms || [])
       setNotes(existingEntry.notes || '')
     } else if (selectedDate) {
-      setDate(new Date(selectedDate).toISOString().split('T')[0])
+      // Use local date formatting to avoid timezone issues
+      const localDate = new Date(selectedDate)
+      const formattedDate = `${localDate.getFullYear()}-${String(localDate.getMonth() + 1).padStart(2, '0')}-${String(localDate.getDate()).padStart(2, '0')}`
+      setDate(formattedDate)
     } else {
-      setDate(new Date().toISOString().split('T')[0])
+      const today = new Date()
+      const formattedDate = `${today.getFullYear()}-${String(today.getMonth() + 1).padStart(2, '0')}-${String(today.getDate()).padStart(2, '0')}`
+      setDate(formattedDate)
     }
   }, [selectedDate, existingEntry])
 
@@ -116,7 +124,10 @@ const MoodForm = ({ selectedDate, existingEntry, onClose }) => {
                 type="date"
                 value={date}
                 onChange={(e) => setDate(e.target.value)}
-                max={new Date().toISOString().split('T')[0]}
+                max={(() => {
+                  const today = new Date()
+                  return `${today.getFullYear()}-${String(today.getMonth() + 1).padStart(2, '0')}-${String(today.getDate()).padStart(2, '0')}`
+                })()}
                 className="input-field"
                 required
               />

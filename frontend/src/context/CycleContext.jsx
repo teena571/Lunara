@@ -1,4 +1,5 @@
 import { createContext, useState, useContext, useEffect } from 'react'
+import { useAuth } from './AuthContext'
 import api from '../utils/axios'
 
 const CycleContext = createContext()
@@ -12,6 +13,7 @@ export const useCycle = () => {
 }
 
 export const CycleProvider = ({ children }) => {
+  const { user } = useAuth()
   const [cycles, setCycles] = useState([])
   const [loading, setLoading] = useState(false)
   const [predictions, setPredictions] = useState(null)
@@ -161,14 +163,22 @@ export const CycleProvider = ({ children }) => {
   }
 
   useEffect(() => {
+    // Reset state when user changes
+    if (!user) {
+      setCycles([])
+      setPredictions(null)
+      setLoading(false)
+      return
+    }
+
     // Only fetch cycles if user has a token
     const token = localStorage.getItem('token')
-    if (token) {
+    if (token && user) {
       fetchCycles()
     } else {
       setLoading(false)
     }
-  }, [])
+  }, [user]) // Re-fetch when user changes
 
   const value = {
     cycles,

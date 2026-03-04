@@ -71,7 +71,7 @@ const MoodPatterns = () => {
                   {mostCommonMood.mood}
                 </p>
                 <p className="text-sm text-neutral-600">
-                  {mostCommonMood.count} times ({Math.round((mostCommonMood.count / totalEntries) * 100)}%)
+                  {mostCommonMood.count} times ({Math.min(100, Math.round((mostCommonMood.count / totalEntries) * 100))}%)
                 </p>
               </div>
             </div>
@@ -95,7 +95,7 @@ const MoodPatterns = () => {
                     <div className="w-20 bg-neutral-200 rounded-full h-2">
                       <div
                         className="bg-wellness-rose h-2 rounded-full transition-all duration-500"
-                        style={{ width: `${(count / totalEntries) * 100}%` }}
+                        style={{ width: `${Math.min(100, Math.round((count / totalEntries) * 100))}%` }}
                       />
                     </div>
                     <span className="text-xs text-neutral-600 w-8">{count}x</span>
@@ -124,13 +124,13 @@ const MoodPatterns = () => {
                       {mood}
                     </span>
                     <span className="text-xs text-neutral-600">
-                      {count} ({Math.round((count / totalEntries) * 100)}%)
+                      {count} ({Math.min(100, Math.round((count / totalEntries) * 100))}%)
                     </span>
                   </div>
                   <div className="w-full bg-neutral-200 rounded-full h-2">
                     <div
                       className={`${MOOD_COLORS[mood]} h-2 rounded-full transition-all duration-500`}
-                      style={{ width: `${(count / totalEntries) * 100}%` }}
+                      style={{ width: `${Math.min(100, Math.round((count / totalEntries) * 100))}%` }}
                     />
                   </div>
                 </div>

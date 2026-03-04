@@ -33,6 +33,9 @@ export const AuthProvider = ({ children }) => {
     try {
       const { data } = await api.post('/auth/login', { email, password })
       
+      // Clear any old user data from localStorage
+      clearOldUserData()
+      
       // Store token and user in localStorage
       localStorage.setItem('token', data.token)
       localStorage.setItem('user', JSON.stringify(data.user))
@@ -57,6 +60,9 @@ export const AuthProvider = ({ children }) => {
   const register = async (name, email, password) => {
     try {
       const { data } = await api.post('/auth/register', { name, email, password })
+      
+      // Clear any old user data from localStorage
+      clearOldUserData()
       
       // Store token and user in localStorage
       localStorage.setItem('token', data.token)
@@ -92,10 +98,29 @@ export const AuthProvider = ({ children }) => {
     }
   }
 
+  const clearOldUserData = () => {
+    // Remove all user-specific data from localStorage
+    const keysToRemove = []
+    for (let i = 0; i < localStorage.length; i++) {
+      const key = localStorage.key(i)
+      if (key && (key.startsWith('moodEntries_') || key === 'moodEntries')) {
+        keysToRemove.push(key)
+      }
+    }
+    keysToRemove.forEach(key => localStorage.removeItem(key))
+  }
+
   const logout = () => {
+    // Clear all user-specific data from localStorage
     localStorage.removeItem('token')
     localStorage.removeItem('user')
+    localStorage.removeItem('moodEntries') // Clear mood data
+    
+    // Clear state
     setUser(null)
+    
+    // Force page reload to clear all contexts
+    window.location.href = '/login'
   }
 
   const value = {
