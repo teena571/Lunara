@@ -48,9 +48,12 @@ const CycleForm = ({ selectedDate, onClose }) => {
       return false
     }
 
-    if (formData.periodLength && (formData.periodLength < 1 || formData.periodLength > 10)) {
-      setError('Period length must be between 1 and 10 days')
-      return false
+    if (formData.periodLength) {
+      const length = parseInt(formData.periodLength)
+      if (isNaN(length) || length < 1 || length > 10) {
+        setError('Period length must be between 1 and 10 days')
+        return false
+      }
     }
 
     return true
@@ -161,11 +164,12 @@ const CycleForm = ({ selectedDate, onClose }) => {
                 name="periodLength"
                 value={formData.periodLength}
                 onChange={handleChange}
-                min="1"
-                max="10"
                 className="input-field"
                 placeholder="e.g., 5"
               />
+              <p className="text-xs text-neutral-500 mt-1">
+                Enter a value between 1 and 10 days
+              </p>
             </div>
 
             {/* Flow */}
