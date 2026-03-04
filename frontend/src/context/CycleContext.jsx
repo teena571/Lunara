@@ -24,7 +24,12 @@ export const CycleProvider = ({ children }) => {
       setCycles(data.data || [])
       calculatePredictions(data.data || [])
     } catch (error) {
-      console.error('Error fetching cycles:', error)
+      // Don't log error if it's 401 (unauthorized) or 400 (validation) - user not logged in
+      if (error.response?.status !== 401 && error.response?.status !== 400) {
+        console.error('Error fetching cycles:', error)
+      }
+      setCycles([])
+      setPredictions(null)
     } finally {
       setLoading(false)
     }
@@ -37,41 +42,79 @@ export const CycleProvider = ({ children }) => {
       return
     }
 
-    // Calculate average cycle length
-    const cycleLengths = cycleData
-      .filter(c => c.cycleLength)
-      .map(c => c.cycleLength)
-    
-    const avgCycleLength = cycleLengths.length > 0
-      ? Math.round(cycleLengths.reduce((a, b) => a + b, 0) / cycleLengths.length)
-      : 28
+    // Sort cycles by start date (most recent first)
+    const sortedCycles = [...cycleData].sort((a, b) => 
+      new Date(b.startDate) - new Date(a.startDate)
+    )
+
+    // Calculate dynamic cycle length from actual data
+    let avgCycleLength = 28 // Default fallback
+
+    if (sortedCycles.length >= 2) {
+      // Calculate differences between consecutive cycles
+      const cycleLengths = []
+      
+      for (let i = 0; i < sortedCycles.length - 1; i++) {
+        const currentStart = new Date(sortedCycles[i].startDate)
+        const previousStart = new Date(sortedCycles[i + 1].startDate)
+        
+        // Calculate days between periods
+        const diffTime = currentStart - previousStart
+        const diffDays = Math.round(diffTime / (1000 * 60 * 60 * 24))
+        
+        if (diffDays > 0 && diffDays <= 45) { // Valid cycle length
+          cycleLengths.push(diffDays)
+        }
+      }
+
+      // Use average of last 2-3 cycles for better accuracy
+      if (cycleLengths.length > 0) {
+        const recentCycles = cycleLengths.slice(0, 3) // Last 3 cycles
+        avgCycleLength = Math.round(
+          recentCycles.reduce((a, b) => a + b, 0) / recentCycles.length
+        )
+      }
+    } else if (sortedCycles.length === 1 && sortedCycles[0].cycleLength) {
+      // If only one cycle, use its cycle length if available
+      avgCycleLength = sortedCycles[0].cycleLength
+    }
 
     // Get last cycle
-    const lastCycle = cycleData.sort((a, b) => 
-      new Date(b.startDate) - new Date(a.startDate)
-    )[0]
+    const lastCycle = sortedCycles[0]
+    const lastStartDate = new Date(lastCycle.startDate)
+    
+    // Predict next period: Last period + calculated cycle length
+    const nextStartDate = new Date(lastStartDate)
+    nextStartDate.setDate(nextStartDate.getDate() + avgCycleLength)
 
-    if (lastCycle) {
-      const lastStartDate = new Date(lastCycle.startDate)
-      const nextStartDate = new Date(lastStartDate)
-      nextStartDate.setDate(nextStartDate.getDate() + avgCycleLength)
+    // Calculate ovulation (14 days before next period)
+    const ovulationDate = new Date(nextStartDate)
+    ovulationDate.setDate(ovulationDate.getDate() - 14)
 
-      // Calculate fertile window (typically days 10-17 of cycle)
-      const fertileStart = new Date(nextStartDate)
-      fertileStart.setDate(fertileStart.getDate() + 10)
-      const fertileEnd = new Date(nextStartDate)
-      fertileEnd.setDate(fertileEnd.getDate() + 17)
+    // Calculate fertile window (5 days before ovulation to 1 day after)
+    const fertileStart = new Date(ovulationDate)
+    fertileStart.setDate(fertileStart.getDate() - 5)
+    const fertileEnd = new Date(ovulationDate)
+    fertileEnd.setDate(fertileEnd.getDate() + 1)
 
-      setPredictions({
-        nextPeriodDate: nextStartDate,
-        avgCycleLength,
-        fertileWindow: {
-          start: fertileStart,
-          end: fertileEnd
-        },
-        daysUntilPeriod: Math.ceil((nextStartDate - new Date()) / (1000 * 60 * 60 * 24))
-      })
-    }
+    // Calculate days until period
+    const today = new Date()
+    today.setHours(0, 0, 0, 0)
+    const nextPeriod = new Date(nextStartDate)
+    nextPeriod.setHours(0, 0, 0, 0)
+    const daysUntilPeriod = Math.ceil((nextPeriod - today) / (1000 * 60 * 60 * 24))
+
+    setPredictions({
+      nextPeriodDate: nextStartDate,
+      avgCycleLength,
+      ovulationDate,
+      fertileWindow: {
+        start: fertileStart,
+        end: fertileEnd
+      },
+      daysUntilPeriod,
+      calculationMethod: sortedCycles.length >= 2 ? 'dynamic' : 'default'
+    })
   }
 
   // Add new cycle
@@ -81,9 +124,10 @@ export const CycleProvider = ({ children }) => {
       await fetchCycles()
       return { success: true, data: data.data }
     } catch (error) {
+      console.error('Add cycle error:', error.response?.data)
       return {
         success: false,
-        error: error.response?.data?.message || 'Failed to add cycle'
+        error: error.response?.data?.message || error.response?.data?.errors?.[0]?.message || 'Failed to add cycle'
       }
     }
   }
@@ -117,7 +161,13 @@ export const CycleProvider = ({ children }) => {
   }
 
   useEffect(() => {
-    fetchCycles()
+    // Only fetch cycles if user has a token
+    const token = localStorage.getItem('token')
+    if (token) {
+      fetchCycles()
+    } else {
+      setLoading(false)
+    }
   }, [])
 
   const value = {

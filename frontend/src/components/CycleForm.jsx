@@ -8,7 +8,9 @@ const CycleForm = ({ selectedDate, onClose }) => {
   const [success, setSuccess] = useState(false)
 
   const [formData, setFormData] = useState({
-    startDate: selectedDate ? selectedDate.toISOString().split('T')[0] : '',
+    startDate: selectedDate 
+      ? `${selectedDate.getFullYear()}-${String(selectedDate.getMonth() + 1).padStart(2, '0')}-${String(selectedDate.getDate()).padStart(2, '0')}`
+      : '',
     endDate: '',
     periodLength: '',
     flow: 'medium',
@@ -63,7 +65,19 @@ const CycleForm = ({ selectedDate, onClose }) => {
 
     setLoading(true)
 
-    const result = await addCycle(formData)
+    // Clean up form data - remove empty strings
+    const cleanedData = {
+      startDate: formData.startDate,
+      flow: formData.flow,
+      symptoms: formData.symptoms,
+    }
+
+    // Only add optional fields if they have values
+    if (formData.endDate) cleanedData.endDate = formData.endDate
+    if (formData.periodLength) cleanedData.periodLength = parseInt(formData.periodLength)
+    if (formData.notes) cleanedData.notes = formData.notes
+
+    const result = await addCycle(cleanedData)
 
     if (result.success) {
       setSuccess(true)
