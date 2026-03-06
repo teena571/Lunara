@@ -10,8 +10,7 @@ import Register from './pages/Register'
 import Dashboard from './pages/Dashboard'
 import CycleTracking from './pages/CycleTracking'
 import MoodTracking from './pages/MoodTracking'
-import Insights from './pages/Insights'
-import Analytics from './pages/Analytics'
+import WellnessAnalytics from './pages/WellnessAnalytics'
 import UpdatePassword from './pages/UpdatePassword'
 import ForgotPassword from './pages/ForgotPassword'
 import ResetPassword from './pages/ResetPassword'
@@ -62,15 +61,16 @@ function App() {
                   </ProtectedRoute>
                 } />
                 
-                <Route path="insights" element={
+                <Route path="analytics" element={
                   <ProtectedRoute>
-                    <Insights />
+                    <WellnessAnalytics />
                   </ProtectedRoute>
                 } />
                 
-                <Route path="analytics" element={
+                {/* Legacy routes - redirect to analytics */}
+                <Route path="insights" element={
                   <ProtectedRoute>
-                    <Analytics />
+                    <WellnessAnalytics />
                   </ProtectedRoute>
                 } />
                 

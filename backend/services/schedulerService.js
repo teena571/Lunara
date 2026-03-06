@@ -238,32 +238,46 @@ const initializeScheduler = () => {
   cron.schedule('0 9 * * *', () => {
     console.log('⏰ Cron: Daily period reminder check');
     checkPeriodReminders();
+  }, {
+    scheduled: true,
+    timezone: "Asia/Kolkata"
   });
 
   // Daily ovulation reminders - Every day at 9:00 AM
   cron.schedule('0 9 * * *', () => {
     console.log('⏰ Cron: Daily ovulation reminder check');
     checkOvulationReminders();
+  }, {
+    scheduled: true,
+    timezone: "Asia/Kolkata"
   });
 
   // Weekly health summary - Every Monday at 9:00 AM
   cron.schedule('0 9 * * 1', () => {
     console.log('⏰ Cron: Weekly health summary');
     sendWeeklyHealthSummary();
+  }, {
+    scheduled: true,
+    timezone: "Asia/Kolkata"
   });
 
-  // Test job - Every minute (for testing, remove in production)
-  if (process.env.NODE_ENV === 'development') {
-    cron.schedule('* * * * *', () => {
-      console.log('⏰ Scheduler is running... (test job)');
-    });
-  }
+  // Test job - Every 5 minutes (for testing, disabled by default)
+  // Uncomment to test scheduler functionality
+  // if (process.env.NODE_ENV === 'development') {
+  //   cron.schedule('*/5 * * * *', () => {
+  //     console.log('⏰ Scheduler is running... (test job)');
+  //   }, {
+  //     scheduled: true,
+  //     timezone: "Asia/Kolkata"
+  //   });
+  // }
 
   console.log('✅ Scheduler initialized successfully');
   console.log('📅 Scheduled jobs:');
-  console.log('   - Period reminders: Daily at 9:00 AM');
-  console.log('   - Ovulation reminders: Daily at 9:00 AM');
-  console.log('   - Weekly summary: Mondays at 9:00 AM');
+  console.log('   - Period reminders: Daily at 9:00 AM IST');
+  console.log('   - Ovulation reminders: Daily at 9:00 AM IST');
+  console.log('   - Weekly summary: Mondays at 9:00 AM IST');
+  console.log('💡 Tip: Use manual triggers for testing (see test-scheduler.js)');
 };
 
 /**

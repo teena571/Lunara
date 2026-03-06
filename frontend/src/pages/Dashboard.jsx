@@ -1,3 +1,4 @@
+import { Link } from 'react-router-dom'
 import { useAuth } from '../context/AuthContext'
 import DownloadReport from '../components/DownloadReport'
 
@@ -41,24 +42,18 @@ const Dashboard = () => {
       <div className="card">
         <h2 className="text-2xl font-semibold mb-4">Quick Actions</h2>
         <div className="grid sm:grid-cols-2 gap-4">
-          <a href="/cycle" className="btn-primary text-left">
+          <Link to="/cycle" className="btn-primary text-left">
             📝 Log Cycle
-          </a>
-          <a href="/mood" className="btn-secondary text-left">
+          </Link>
+          <Link to="/mood" className="btn-secondary text-left">
             💭 Log Mood
-          </a>
-          <a href="/analytics" className="btn-secondary text-left">
-            📊 View Analytics
-          </a>
-          <a href="/insights" className="btn-secondary text-left">
-            💡 Smart Insights
-          </a>
-          <button 
-            onClick={() => window.location.href = '/update-password'}
-            className="btn-secondary text-left"
-          >
+          </Link>
+          <Link to="/analytics" className="btn-secondary text-left">
+            📊 Wellness Analytics
+          </Link>
+          <Link to="/update-password" className="btn-secondary text-left">
             🔒 Change Password
-          </button>
+          </Link>
         </div>
       </div>
     </div>
