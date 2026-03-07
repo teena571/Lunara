@@ -29,7 +29,31 @@ app.use(express.urlencoded({ extended: true }));
 app.use(helmet());
 app.use(mongoSanitize());
 app.use(hpp());
-app.use(cors());
+
+// CORS configuration - Allow frontend origins
+const corsOptions = {
+  origin: function (origin, callback) {
+    const allowedOrigins = [
+      'http://localhost:5173',
+      'http://localhost:3000',
+      'https://lunara-app.vercel.app',
+      // Add your custom domain here when you have one
+    ];
+    
+    // Allow requests with no origin (like mobile apps or Postman)
+    if (!origin) return callback(null, true);
+    
+    if (allowedOrigins.indexOf(origin) !== -1) {
+      callback(null, true);
+    } else {
+      callback(new Error('Not allowed by CORS'));
+    }
+  },
+  credentials: true,
+  optionsSuccessStatus: 200
+};
+
+app.use(cors(corsOptions));
 
 // Rate limiting - More lenient for development
 const limiter = rateLimit({
