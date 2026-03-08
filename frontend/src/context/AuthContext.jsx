@@ -31,7 +31,10 @@ export const AuthProvider = ({ children }) => {
 
   const login = async (email, password) => {
     try {
+      console.log('Attempting login...', { email }) // Debug log
       const { data } = await api.post('/auth/login', { email, password })
+      
+      console.log('Login successful:', data) // Debug log
       
       // Clear any old user data from localStorage
       clearOldUserData()
@@ -48,7 +51,20 @@ export const AuthProvider = ({ children }) => {
         message: data.message 
       }
     } catch (error) {
+      console.error('Login error:', error) // Debug log
+      console.error('Error response:', error.response) // Debug log
+      
       const errorData = error.response?.data
+      
+      // Network error
+      if (!error.response) {
+        return {
+          success: false,
+          message: 'Network error. Please check your internet connection.',
+          code: 'NETWORK_ERROR'
+        }
+      }
+      
       return {
         success: false,
         message: errorData?.message || errorData?.error || 'Login failed',
